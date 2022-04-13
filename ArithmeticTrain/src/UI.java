@@ -29,6 +29,10 @@ public class UI extends JFrame {
     JButton nextButton = new JButton("next");
     ImageIcon bg = new ImageIcon("ArithmeticTrain/sun.jpg");
 
+    int correctCount = 0;
+    long startTime, endTime;
+    JButton report = new JButton("report");
+
     UI() {
         this.setTitle("Mental arithmetic practice"); // set title
         this.setSize(800, 500);
@@ -210,6 +214,7 @@ public class UI extends JFrame {
     }
 
     public void trainUI() {
+        startTime = System.currentTimeMillis();
         ExpGen expGen = new ExpGen(op, range, count, sign);
         Map<String, Integer> mp = expGen.getQuestions(); // put String(expression) and int(answer) to mp
         ArrayList<String> questions = new ArrayList<String>();
@@ -242,6 +247,46 @@ public class UI extends JFrame {
 
         nextButton.setFont(new Font("", Font.PLAIN, 20));
         nextButton.setBounds(320 - 100, 350, 120, 30);
+        report.setBounds(220,360,100,40);
+        report.setFont(new Font("", Font.BOLD, 20));
+
+
+        report.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.removeAll();
+                panel.add(bgLabel, Integer.valueOf(Integer.MIN_VALUE));
+                long time = (endTime - startTime) / 1000;
+                JLabel timeLabel = new JLabel("You take " + time + "s to solve all questions");
+                JLabel correctLabel = new JLabel("Accuracy: " + correctCount +  "/" + count);
+                timeLabel.setBounds(100,100,400,30);
+                correctLabel.setBounds(100,150,400,30);
+                timeLabel.setFont(new Font("",Font.BOLD, 20));
+                correctLabel.setFont(new Font("",Font.BOLD, 20));
+                panel.add(timeLabel);
+                panel.add(correctLabel);
+
+                if(time < count * 10 && 1.0 * correctCount == count){
+                    JLabel goodLabel = new JLabel("You are very good!");
+                    goodLabel.setBounds(100,200,400,30);
+                    goodLabel.setFont(new Font("",Font.BOLD, 20));
+                    panel.add(goodLabel);
+                }
+                else if(time < count * 10 && 1.0 * correctCount / count >= 0.6){
+                    JLabel goodLabel = new JLabel("Not bad!");
+                    goodLabel.setBounds(100,200,400,30);
+                    goodLabel.setFont(new Font("",Font.BOLD, 20));
+                    panel.add(goodLabel);
+                }
+                else{
+                    JLabel goodLabel = new JLabel("You need more practice!");
+                    goodLabel.setBounds(100,200,400,30);
+                    goodLabel.setFont(new Font("",Font.BOLD, 20));
+                    panel.add(goodLabel);
+                }
+                repaint();
+            }
+        });
         /*
         Output different results based on the user's answer and whatever the user complete every questions
          */
@@ -258,6 +303,7 @@ public class UI extends JFrame {
                         if (ans == mp.get(questions.get(currentPage))) {    //mp is the map of questions and answer
                             correctLabel.setBounds(280 - 100, 280, 500, 30);
                             correctLabel.setText("Congratulations, you're right");
+                            correctCount++;
                         } else {
                             correctLabel.setBounds(250 - 100, 280, 500, 30);
                             correctLabel.setText("Sorry, you're wrong, answer is " + mp.get(questions.get(currentPage)));
@@ -270,9 +316,11 @@ public class UI extends JFrame {
                     if (currentPage < count - 1) {
                         panel.add(nextButton);
                     } else {
+                        endTime = System.currentTimeMillis();
                         JLabel finish = new JLabel("Finish!");
-                        finish.setBounds(320 - 100, 350, 150, 40);
+                        finish.setBounds(320 - 100, 320, 300, 40);
                         finish.setFont(new Font("", Font.BOLD, 30));
+                        panel.add(report);
                         panel.add(finish);
                     }
                     repaint();
